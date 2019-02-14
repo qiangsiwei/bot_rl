@@ -5,7 +5,6 @@ sys.path.append('..')
 from bot_rl.bot_rl import BotRL
 
 def train(bot):
-	bot.warmup()
 	bot.train()
 
 def test(bot):
@@ -13,5 +12,5 @@ def test(bot):
 
 if __name__ == '__main__':
 	bot = BotRL()
-	# train(bot)
-	test(bot)
+	train(bot)
+	# test(bot)

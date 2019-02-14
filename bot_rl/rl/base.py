@@ -62,9 +62,7 @@ class RL(object):
 		return self.rule_action() if use_rule else self.dqn_action(state)
 
 	def add_exp(self, state, action, reward, nstate, done):
-		if len(self.memory) < self.max_mem: self.memory.append(None)
-		self.memory[self.mem_ind] = state,action,reward,nstate,done
-		self.mem_ind = (self.mem_ind+1)%self.max_mem
+		pass
 
 	def empty_mem(self):
 		self.memory, self.mem_ind = [], 0
@@ -72,6 +70,9 @@ class RL(object):
 	def is_mem_full(self):
 		return len(self.memory) == self.max_mem
 
+	def copy(self):
+		pass
+		
 	def train(self):
 		pass
 

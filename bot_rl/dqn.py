@@ -30,9 +30,6 @@ class DQN(object):
 		model.compile(loss='mse',optimizer=Adam(lr=self.lr))
 		return model
 
-	def copy(self):
-		self.tar_model.set_weights(self.beh_model.get_weights())
-
 	def save_weights(self):
 		if not self.save_path: return
 		self.beh_model.save_weights(re.sub(ur'(?=.h5$)','_beh',self.save_path))
@@ -46,13 +43,6 @@ class DQN(object):
 	def reset(self):
 		self.rule_slot_ind = 0
 		self.rule_phase = 'not done'
-
-	def dqn_predict(self, states, target=False):
-		return self.tar_model.predict(states) if target else\
-			   self.beh_model.predict(states)
-
-	def dqn_predict1(self, state, target=False):
-		return self.dqn_predict(state.reshape(1,self.s_size),target).flatten()
 
 	def ind_to_act(self, ind):
 		for i,a in enumerate(self.actions):
@@ -74,6 +64,13 @@ class DQN(object):
 			resp['intent'] = 'done'
 		return self.act_to_ind(resp), resp
 
+	def dqn_predict(self, states, target=False):
+		return self.tar_model.predict(states) if target else\
+			   self.beh_model.predict(states)
+
+	def dqn_predict1(self, state, target=False):
+		return self.dqn_predict(state.reshape(1,self.s_size),target).flatten()
+
 	def dqn_action(self, state):
 		ind = np.argmax(self.dqn_predict1(state))
 		return ind, self.ind_to_act(ind)
@@ -94,6 +91,9 @@ class DQN(object):
 
 	def is_mem_full(self):
 		return len(self.memory) == self.max_mem
+
+	def copy(self):
+		self.tar_model.set_weights(self.beh_model.get_weights())
 
 	def train(self):
 		n_batch = len(self.memory)/self.b_size

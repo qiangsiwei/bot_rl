@@ -12,6 +12,7 @@ class Config(object):
 				'user_goals'  :'../data/user_goals.pkl'
 			},
 			'run': {
+				'model'       :'per_dqn',
 				'warmup_mem'  :1000,
 				'ep_run_num'  :40000,
 				'train_freq'  :100,

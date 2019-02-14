@@ -8,10 +8,16 @@ from usim import USim
 from user import User
 from utils import *
 from config import config as c
+from rl import DQN, DouDQN, DueDQN, PerDQN
 
 class BotRL(object):
 
 	def __init__(self):
+		self.models = {
+			'dqn'     :DQN,
+			'dou_dqn' :DouDQN,
+			'due_dqn' :DueDQN,
+			'per_dqn' :PerDQN}
 		read = lambda fn: pickle.load(open(get_path(c.c['paths'][fn]),'rb'))
 		self.movie_db = read('movie_db')
 		remove_empty_slots(self.movie_db)
@@ -19,7 +25,8 @@ class BotRL(object):
 		self.user_goals = read('user_goals')
 		self.dst = DST(self.movie_db)
 		self.emc = EMC(self.movie_dict)
-		self.dqn = DQN(self.dst.s_size)
+		assert c.c['run']['model'] in self.models
+		self.dqn = self.models[c.c['run']['model']](self.dst.s_size)
 
 	def eps_reset(self):
 		self.dst.reset()
@@ -49,6 +56,7 @@ class BotRL(object):
 
 	def train(self):
 		self.usr = USim(self.movie_db,self.user_goals)
+		self.warmup()
 		eps = 0; succ_total,reward_total = 0,0; best = 0.0
 		while eps < c.c['run']['ep_run_num']:
 			self.eps_reset(); eps += 1; done = False
@@ -57,7 +65,7 @@ class BotRL(object):
 				nstate,reward,done,succ = self.next_turn(state)
 				reward_total += reward
 				state = nstate
-			if succ: self.dst.print_history(); print '-'*10
+			# if succ: self.dst.print_history(); print '-'*10
 			succ_total += succ
 			if eps%c.c['run']['train_freq'] == 0:
 				succ_rate = 1.*succ_total/c.c['run']['train_freq']
